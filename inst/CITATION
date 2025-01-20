@@ -1,0 +1,12 @@
+
+bibentry(bibtype = "techreport",
+  author = "Tim Riffe",
+  title = "Reading Human Fertility Database and Human Mortality Database data into R",
+  institution = "MPIDR",
+  year = "2015",
+  url = "https://dx.doi.org/10.4054/MPIDR-TR-2015-004",
+  number = "TR-2015-004",
+  doi = "10.4054/MPIDR-TR-2015-004",
+  header="To cite HMDHFDplus in publications, please use:",
+  textVersion = "T. Riffe. Reading Human Fertility Database and Human Mortality Database data into R. MPIDR, TR-2015-004, 2015."
+)

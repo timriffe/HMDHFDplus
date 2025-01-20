@@ -1,0 +1,42 @@
+Package: HMDHFDplus
+Type: Package
+Title: Read Human Mortality Database and Human Fertility Database Data from the Web
+Version: 2.0.52
+Date: 2025-01-20
+Authors@R: c(
+   person("Tim", "Riffe", role = c("aut", "cre"), 
+          email = "tim.riffe@gmail.com"),
+   person("Carl", "Boe", role = "aut"),
+   person("Jason", "Hilton", role = "aut"),
+   person("Josh", "Goldstein", role = "ctb"),
+   person("Stephen", "Holzman", role = "ctb"),
+   person("Sam", "Hyun Yoo", role = "ctb"))
+Description: Utilities for reading data from the Human Mortality Database (<https://www.mortality.org>), Human Fertility Database (<https://www.humanfertility.org>), and similar databases from the web or locally into an R session as data.frame objects. These are the two most widely used sources of demographic data to study basic demographic change, trends, and develop new demographic methods. Other supported databases at this time include the Human Fertility Collection (<https://www.fertilitydata.org>), The Japanese Mortality Database (<https://www.ipss.go.jp/p-toukei/JMD/index-en.html>), and the Canadian Human Mortality Database (<http://www.bdlc.umontreal.ca/chmd/>). Arguments and data are standardized.
+URL: https://github.com/timriffe/TR1
+BugReports: https://github.com/timriffe/TR1/issues
+License: GPL-2
+LazyLoad: yes
+Encoding: UTF-8
+Depends:
+    R (>= 4.1),
+Collate:
+    'age2int.R'
+    'HFDutils.R'
+    'HMDutils.R'
+    'readHFD.R' 
+    'readHMD.R'  
+    'userInput.R'
+Imports: 
+	httr,
+	rvest,
+	dplyr,
+	janitor,
+	lubridate,
+	readr,
+	stringr,
+	tidyr,
+	rlang,
+	tidyselect
+Suggests:
+    RCurl
+RoxygenNote: 7.3.2
