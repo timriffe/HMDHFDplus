@@ -7,3 +7,4 @@
 ^revdep$
 build.R
 .github
+^CRAN-SUBMISSION$
