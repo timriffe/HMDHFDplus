@@ -1,7 +1,7 @@
 # Changes in this update
 
-# HMDHFDplus 2.0.52
-20 January 2025
+# HMDHFDplus 2.0.6
+21 January 2025
 * minor change to DESCRIPTION to comply w CRAN.
 * Fixes minor OpenInterval coding error for HFD denominators. HT @alysonvanraalte
 
