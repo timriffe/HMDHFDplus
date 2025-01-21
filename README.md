@@ -13,10 +13,10 @@ install.packages("HMDHFDplus")
 
 Install the development version like so:
 ```r
-# install.packages("devtools")
+# install.packages("remotes")
 
-library(devtools)
-install_github("timriffe/TR1/TR1/HMDHFDplus")
+library(remotes)
+install_github("timriffe/HMDHFDplus")
 ```
 
 Then you can run the examples like so:
@@ -31,4 +31,5 @@ library(HMDHFDplus)
 ?readHFCweb
              
 ```
-
+# Note
+This repository replaces the previous one <https://github.com/timriffe/TR1> for purposes of maintaining the package. TR1 holds materials for my 2015 technical report on this package.
