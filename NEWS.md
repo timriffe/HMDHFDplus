@@ -1,5 +1,9 @@
 # Changes in this update
 
+# HMDHFDplus 2.0.7
+11 February 2025
+* fixes date handling bug when specific HFD update is requested HT Rahul Mondal
+
 # HMDHFDplus 2.0.6
 21 January 2025
 * minor change to DESCRIPTION to comply w CRAN.

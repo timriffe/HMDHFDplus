@@ -174,7 +174,8 @@ https://www.humanfertility.org/Account/UserAgreement"))
 	if (is.null(Update)){
 	  yyyymmdd <- getHFDdate(CNTRY)
 	} else {
-	  if (is.Date(ymd(yyyymmdd))){
+
+	  if (is.Date(ymd(Update))){
 	    cat("Attempting to retrieve data from your requested Update date")
 	    yyyymmdd <- Update
 	  } else {
