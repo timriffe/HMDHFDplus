@@ -86,8 +86,8 @@ HMDparse <- function(DF, filepath){
 #' @export
 
 getHMDcountries <- function(){
-  
-  xpath <- "/html/body/div[1]/div/div[3]"
+
+  xpath <- "/html/body/div[1]/div/div[5]"
   html <- read_html("https://www.mortality.org")
   
   links <-

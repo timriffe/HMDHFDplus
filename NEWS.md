@@ -1,5 +1,9 @@
 # Changes in this update
 
+# HMDHFDplus 2.0.8
+2 October 2025
+* fixes xpath for getHMDcountries() to adapt to changes in HMD website. HT Ugo and Alyson for reporting
+
 # HMDHFDplus 2.0.7
 11 February 2025
 * fixes date handling bug when specific HFD update is requested HT Rahul Mondal

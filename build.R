@@ -37,7 +37,7 @@ sessionInfo()
 
 
 # windows checks on different versions:
-#  20, Jan 2025
+#  2, Oct 2025
 check_win_release()    # sent OK
 check_win_devel()      # sent
 check_win_oldrelease() # sent OK
@@ -74,7 +74,8 @@ release()
 devtools::load_all()
 test<- readHFDweb("ITA", "asfrRR",
                   username = Sys.getenv("us"),
-                  password = Sys.getenv("pw"),
-                  Update ="20220531")
-test
-
+                  password = Sys.getenv("pw"))
+test<- readHMDweb("BEL", "Population",
+                  username = Sys.getenv("us"),
+                  password = Sys.getenv("pw"))
+getHMDcountries()

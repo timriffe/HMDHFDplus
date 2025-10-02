@@ -1,19 +1,19 @@
-This is a minor package update to open and close connections more neatly and eliminating artifacts that were messing up Rmd builds. Also some little fixes to capture subpopulations that were missed in the previous update. I've informed the maintainers of two reverse dependencies to import this forthcoming version.
+This is a minor package update to adapt to the updated web design of the human mortality database. This changed an xpath that broke some functions, now fixed.
 
 ## Test environments
 * Ubuntu 20.04.6 LTS
-  * R version 4.3.0 (2023-04-21)
+  * R version 4.5.1 (2025-06-13)
   
 * rhub:
-  * linux ubuntu-latest (R-devel)
-  * macos-13 (R-devel)
-  * macos-arm64 (R-devel)
-  * windows-latest (R-devel)
+  * linux 24.04.3 LTS (R-devel)
+  * macos-13.7.6 (R-devel)
+  * macos-arm64 15.6.1 (R-devel)
+  * windows Microsoft Windows Server 2025 10.0.26100 (R-devel)
 
 * win-builder
-  * R version 4.3.3 (2024-02-29 ucrt)
-  * R Under development (unstable) (2023-06-19 r84573 ucrt)
-  * R version 4.3.1 (2023-06-16 ucrt)
+  * R version 4.5.1 (2025-06-13 ucrt)
+  * R Under development (unstable) (2025-10-01 r88895 ucrt)
+  * R version 4.4.3 (2025-02-28 ucrt)
 
 ## R CMD check results
 All of the above returned:
