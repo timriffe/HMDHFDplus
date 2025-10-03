@@ -59,7 +59,7 @@ revdepcheck::revdep_check()
 
 devtools::release()
 
-#use_revdep()
+1#use_revdep()
 #revdepcheck::revdep_check()
 
 #devtools::install_github("GuangchuangYu/badger")
