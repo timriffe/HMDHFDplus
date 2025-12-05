@@ -7,22 +7,45 @@
 readHMDweb(CNTRY, item, username, password, fixup = TRUE)
 }
 \arguments{
-\item{CNTRY}{character. HMD population letter code. If not spelled right, or not specified, the function provides a selection list. Only 1.}
+\item{CNTRY}{character. HMD population letter code. If not spelled right, or
+not specified, the function provides a selection list. Only 1.}
 
-\item{item}{character. The statistical product you want, e.g., \code{"fltper_1x1"}. Only 1.}
+\item{item}{character. The statistical product you want, e.g.,
+\code{"fltper_1x1"}. Only 1.}
 
-\item{username}{character. Your HMD user id, usually the email address you registered with the HMD under. If left blank, you'll be prompted. Do that if you don't mind the typing and prefer not to save your username in your code.}
+\item{username}{character. Your HMD user id, usually the email address you
+registered with the HMD under. If left blank, you'll be prompted. Do that
+if you don't mind the typing and prefer not to save your username in your
+code.}
 
-\item{password}{character. Your HMD password. If left blank, you'll be prompted. Do that if you don't mind the typing and prefer not to save your password in your code.}
+\item{password}{character. Your HMD password. If left blank, you'll be
+prompted. Do that if you don't mind the typing and prefer not to save your
+password in your code.}
 
-\item{fixup}{logical. Should columns be made more user-friendly, e.g., forcing Age to be integer?}
+\item{fixup}{logical. Should columns be made more user-friendly, e.g.,
+forcing Age to be integer?}
 }
 \value{
-data.frame of the HMD product, read as as \code{readHMD()} would read it.
+data.frame of the HMD product, read as as \code{readHMD()} would read
+  it.
 }
 \description{
-This is a basic HMD data grabber, based on Carl Boe's original \code{HMD2R()}. It will only grab a single HMD statistical product from a single country. Some typical R pitfalls are removed: The Age column is coerced to integer, while an AgeInterval column is created. Also Population counts are placed into two columns, for Jan. 1st and Dec. 31 of the same year, so as to remove headaches from population universe adjustments, such as territorial changes. Fewer options means less to break. To do more sophisticated data extraction, iterate over country codes or statistical items. Reformatting can be done outside this function using, e.g., \code{long2mat()}. Argument \code{fixup} is outsourced to \code{HMDparse()}.
+This is a basic HMD data grabber, based on Carl Boe's original
+\code{HMD2R()}. It will only grab a single HMD statistical product from a
+single country. Some typical R pitfalls are removed: The Age column is
+coerced to integer, while an AgeInterval column is created. Also Population
+counts are placed into two columns, for Jan. 1st and Dec. 31 of the same
+year, so as to remove headaches from population universe adjustments, such as
+territorial changes. Fewer options means less to break. To do more
+sophisticated data extraction, iterate over country codes or statistical
+items. Reformatting can be done outside this function using, e.g.,
+\code{long2mat()}. Argument \code{fixup} is outsourced to \code{HMDparse()}.
 }
 \details{
-This function points to the new HMD website (from June 2022) rather than the mirror of the old site that it temporarily pointed to; If your credentials fail then a likely reason is that you need to re-register at the new HMD website \href{https://www.mortality.org/Account/UserAgreement}{https://www.mortality.org/Account/UserAgreement}. As soon as you register, your new credentials should work.
+This function points to the new HMD website (from June 2022) rather
+  than the mirror of the old site that it temporarily pointed to; If your
+  credentials fail then a likely reason is that you need to re-register at
+  the new HMD website
+  \href{https://www.mortality.org/Account/UserAgreement}{https://www.mortality.org/Account/UserAgreement}.
+  As soon as you register, your new credentials should work.
 }

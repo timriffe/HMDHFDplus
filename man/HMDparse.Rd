@@ -12,11 +12,24 @@ HMDparse(DF, filepath)
 \item{filepath}{just to check if these are population counts from the name.}
 }
 \value{
-DF same data.frame, modified so that columns are of a useful class. If there were open age categories, such as \code{"-"} or \code{"+"}, this information is stored in a new dummy column called \code{OpenInterval}.
+DF same data.frame, modified so that columns are of a useful class. If there were #open age categories, such as \code{"-"} or \code{"+"}, this information is stored in a new #dummy column called \code{OpenInterval}.
+
+DF same data.frame, modified so that columns are of a useful class.
+If there were open age categories, such as \code{"-"} or \code{"+"},
+this information is stored in a new dummy column called \code{OpenInterval}.
 }
 \description{
-called by \code{readHMD()} and \code{readHMDweb()}. We assume there are no factors in the given data.frame and that it has been read in from the raw text files using something like: \code{ read.table(file = filepath, header = TRUE, skip = 2, na.strings = ".", as.is = TRUE)}. This function is visible to users, but is not likely needed directly.
+called by \code{readHMD()} and \code{readHMDweb()}. We assume there are no #factors in the given data.frame and that it has been read in from the raw text files using #something like: \code{ read.table(file = filepath, header = TRUE, skip = 2, na.strings = "."#, as.is = TRUE)}. This function is visible to users, but is not likely needed directly.
+
+called by \code{readHMD()} and \code{readHMDweb()}.
+We assume there are no factors in the given data.frame and that it has been
+read in from the raw text files using something like:
+\code{ read.table(file = filepath, header = TRUE, skip = 2,
+                  na.strings = ".", as.is = TRUE)}.
+This function is visible to users, but is not likely needed directly.
 }
 \details{
+This parse routine is based on the subjective opinions of the author...
+
 This parse routine is based on the subjective opinions of the author...
 }

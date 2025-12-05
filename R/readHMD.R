@@ -40,165 +40,222 @@ readHMD <- function(filepath, fixup = TRUE, ...){
 # readHMDweb()
 ############################################################################
 
-#'
 #' @title readHMDweb a basic HMD data grabber.
-#' 
-#' @description This is a basic HMD data grabber, based on Carl Boe's original \code{HMD2R()}. It will only grab a single HMD statistical product from a single country. Some typical R pitfalls are removed: The Age column is coerced to integer, while an AgeInterval column is created. Also Population counts are placed into two columns, for Jan. 1st and Dec. 31 of the same year, so as to remove headaches from population universe adjustments, such as territorial changes. Fewer options means less to break. To do more sophisticated data extraction, iterate over country codes or statistical items. Reformatting can be done outside this function using, e.g., \code{long2mat()}. Argument \code{fixup} is outsourced to \code{HMDparse()}.
 #'
-#' @param CNTRY character. HMD population letter code. If not spelled right, or not specified, the function provides a selection list. Only 1.
-#' @param item character. The statistical product you want, e.g., \code{"fltper_1x1"}. Only 1.
-#' @param username character. Your HMD user id, usually the email address you registered with the HMD under. If left blank, you'll be prompted. Do that if you don't mind the typing and prefer not to save your username in your code.
-#' @param password character. Your HMD password. If left blank, you'll be prompted. Do that if you don't mind the typing and prefer not to save your password in your code.
-#' @param fixup logical. Should columns be made more user-friendly, e.g., forcing Age to be integer?
-#' 
-#' @return data.frame of the HMD product, read as as \code{readHMD()} would read it.
+#' @description This is a basic HMD data grabber, based on Carl Boe's original
+#' \code{HMD2R()}. It will only grab a single HMD statistical product from a
+#' single country. Some typical R pitfalls are removed: The Age column is
+#' coerced to integer, while an AgeInterval column is created. Also Population
+#' counts are placed into two columns, for Jan. 1st and Dec. 31 of the same
+#' year, so as to remove headaches from population universe adjustments, such as
+#' territorial changes. Fewer options means less to break. To do more
+#' sophisticated data extraction, iterate over country codes or statistical
+#' items. Reformatting can be done outside this function using, e.g.,
+#' \code{long2mat()}. Argument \code{fixup} is outsourced to \code{HMDparse()}.
 #'
-#' @details This function points to the new HMD website (from June 2022) rather than the mirror of the old site that it temporarily pointed to; If your credentials fail then a likely reason is that you need to re-register at the new HMD website \href{https://www.mortality.org/Account/UserAgreement}{https://www.mortality.org/Account/UserAgreement}. As soon as you register, your new credentials should work.
-#' 
+#' @param CNTRY character. HMD population letter code. If not spelled right, or
+#'   not specified, the function provides a selection list. Only 1.
+#' @param item character. The statistical product you want, e.g.,
+#'   \code{"fltper_1x1"}. Only 1.
+#' @param username character. Your HMD user id, usually the email address you
+#'   registered with the HMD under. If left blank, you'll be prompted. Do that
+#'   if you don't mind the typing and prefer not to save your username in your
+#'   code.
+#' @param password character. Your HMD password. If left blank, you'll be
+#'   prompted. Do that if you don't mind the typing and prefer not to save your
+#'   password in your code.
+#' @param fixup logical. Should columns be made more user-friendly, e.g.,
+#'   forcing Age to be integer?
+#'
+#' @return data.frame of the HMD product, read as as \code{readHMD()} would read
+#'   it.
+#'
+#' @details This function points to the new HMD website (from June 2022) rather
+#'   than the mirror of the old site that it temporarily pointed to; If your
+#'   credentials fail then a likely reason is that you need to re-register at
+#'   the new HMD website
+#'   \href{https://www.mortality.org/Account/UserAgreement}{https://www.mortality.org/Account/UserAgreement}.
+#'   As soon as you register, your new credentials should work.
+#'
 #' @importFrom rvest html_form_set session html_form session_submit session_jump_to
 #' @importFrom httr content status_code
 #' @importFrom dplyr pull
 #' @export
-#' 
 readHMDweb <- function(CNTRY, item, username, password, fixup = TRUE){
-	## based on Carl Boe's RCurl tips
-	# modified by Tim Riffe 
-	
-	# let user input name and password
-	if (missing(username)){
-		if (interactive()){
-			cat("\ntype in HMD username (usually your email, quotes not necessary):\n")
-			username <- userInput(FALSE)
-		} else {
-			stop("if username and password not given as arguments, the R session must be interactive.")
-		}
-	}
-	if (missing(password)){
-		if (interactive()){
-			cat("\ntype in HMD password:\n")
-			password <-  userInput(FALSE)
-		} else {
-			stop("if username and password not given as arguments, the R session must be interactive.")
-		}
-	}
-	
+  ## based on Carl Boe's RCurl tips
+  # modified by Tim Riffe
+  
+  # let user input name and password
+  if (missing(username)){
+    if (interactive()){
+      cat("\ntype in HMD username (usually your email, quotes not necessary):\n")
+      username <- userInput(FALSE)
+    } else {
+      stop("if username and password not given as arguments, the R session must be interactive.")
+    }
+  }
+  if (missing(password)){
+    if (interactive()){
+      cat("\ntype in HMD password:\n")
+      password <-  userInput(FALSE)
+    } else {
+      stop("if username and password not given as arguments, the R session must be interactive.")
+    }
+  }
+  
   # Get logged in, starting here
   loginURL <- "https://www.mortality.org/Account/Login"
-  # concatenate the login string
   
+  # concatenate the login string
   html <- session(loginURL)
   
-  # olny one form on login page:
-  pgform    <- html_form(html)[[1]]  
-  
-  # # hack because rvest doesn't record where we were??
+  # only one form on login page:
+  pgform        <- html_form(html)[[1]]
+  # hack because rvest doesn't record where we were??
   pgform$action <- loginURL
   pgform$url    <- loginURL
   the_token     <- pgform$fields["__RequestVerificationToken"]
-  filled_form   <- suppressWarnings(html_form_set(pgform,
-                                 Email = username,
-                                 Password = password,
-                                 '__RequestVerificationToken' =
-                                   unlist(the_token)["__RequestVerificationToken.value" ]))
+  filled_form   <- suppressWarnings(
+    html_form_set(
+      pgform,
+      Email = username,
+      Password = password,
+      '__RequestVerificationToken' =
+        unlist(the_token)["__RequestVerificationToken.value"]
+    )
+  )
+  
   # test once credentials validated
   html2 <- session_submit(html, filled_form)
-
   Continue <- status_code(html2) == 200
   if (!Continue) {
-    stop(paste0("login didn't work. \nMaybe your username or password are off?
-If your username and password are from before July 2022
-then you'll need to re-register for HMD, starting here:
-
-https://www.mortality.org/Account/UserAgreement\n
-We no longer refer to the mirror website https://www.former.mortality.org
-Those shenanigans were just a temporary patch to buy time to recode for the new site!\n"))
+    stop(paste0(
+      "login didn't work.\n",
+      "Maybe your username or password are off? If your username and password are from before July 2022\n",
+      "then you'll need to re-register for HMD, starting here:\n",
+      "  https://www.mortality.org/Account/UserAgreement\n",
+      "We no longer refer to the mirror website https://www.former.mortality.org.\n",
+      "Those shenanigans were just a temporary patch to buy time to recode for the new site!\n"
+    ))
   }
   
-	ctrylist    <- getHMDcountries()
-			
-	ctrylookup  <- ctrylist |>
-	  select(-"link")
-	
-	# get CNTRY
-	if (missing(CNTRY)){    
-		cat("\nCNTRY missing\n")
-		if (interactive()){
-			CNTRY <- select.list(choices = ctrylookup$CNTRY, multiple = FALSE, title = "Select Country Code")
-		} else {
-			stop("CNTRY should be one of these:\n",paste(ctrylookup$CNTRY, collapse = ",\n"))
-		}
-	}
-	if (!(CNTRY %in% ctrylookup$CNTRY)){
-		cat("\nCNTRY not found\n")
-		if (interactive()){
-			CNTRY <- select.list(choices = ctrylookup$CNTRY, multiple = FALSE, title = "Select Country Code")
-		} else {
-			stop("CNTRY should be one of these:\n",paste(ctrylookup$CNTRY, collapse = ",\n"))
-		}
-	}
-	stopifnot(length(CNTRY) == 1)
-	
-	# repeat for item
-	item_table <- getHMDitemavail(CNTRY) 
-	
-	itemlookup <-
-	  item_table |>
-	  pull("item")
-	
-	if (missing(item)){    
-		cat("\nitem missing\n")
-		if (interactive()){
-			item <- select.list(choices = itemlookup, multiple = FALSE, title = "Select item Code")
-		} else {
-		  cat("\nTry running getHMDitemavail() if you're not sure which item you want.\n")
-			stop(paste0("item should be one of these:\n",paste(itemlookup, collapse = ", "),"\n"))
-		}
-	}
-	if (!(item %in% itemlookup)){
-		cat("\nitem not found\n")
-		if (interactive()){
-			item <- select.list(choices = itemlookup, multiple = FALSE, title = "Select item Code")
-		} else {
-		  cat("\nTry running getHMDitemavail() if you're not sure which item you want.\n")
-			stop("item should be one of these:\n",paste(itemlookup, collapse = ",\n"))
-		}
-	}
-	stopifnot(length(item) == 1)
-  .item = item
-	stub_url <- item_table |>
-	  filter(item == .item) |>
-	  pull("link")
-	
-	grab_url <- paste0("https://www.mortality.org", stub_url)
-	
-	# TR: This session jump doesn't seem to be working
-	# as expected; grab url brings me to text file
-	# if I paste it in a tab (logged in), but when I
-	# do a session_jump_to() it then I seem to stay at
-	# the login page, so I'm not seeing the 
-	data_grab <- session_jump_to(html2, 
-	                             url = grab_url)
-
-
-	# TR: this is all test code, not expected to run yet
-	the_table <- 
-	  content(data_grab$response, 
-	          as = "text", 
-	          encoding = "UTF-8") 
-	con <- 
-	  textConnection(the_table)
-
-	DF <-
-	  read.table(con,
-	             header = TRUE, 
-	             skip = 2, 
-	             na.strings = ".", 
-	             as.is = TRUE) |>
-	  HMDparse(filepath = grab_url)
-	close(con)
-
+  ctrylist   <- getHMDcountries()
+  
+  ctrylookup <- ctrylist |>
+    select(-"link")
+  # get CNTRY
+  if (missing(CNTRY)){
+    cat("\nCNTRY missing\n")
+    if (interactive()){
+      CNTRY <- select.list(choices = ctrylookup$CNTRY, multiple = FALSE,
+                           title = "Select Country Code")
+    } else {
+      stop("CNTRY should be one of these:\n",
+           paste(ctrylookup$CNTRY, collapse = ",\n"))
+    }
+  }
+  if (!(CNTRY %in% ctrylookup$CNTRY)){
+    cat("\nCNTRY not found\n")
+    if (interactive()){
+      CNTRY <- select.list(choices = ctrylookup$CNTRY, multiple = FALSE,
+                           title = "Select Country Code")
+    } else {
+      stop("CNTRY should be one of these:\n",
+           paste(ctrylookup$CNTRY, collapse = ",\n"))
+    }
+  }
+  stopifnot(length(CNTRY) == 1)
+  
+  # repeat for item
+  item_table <- getHMDitemavail(CNTRY)
+  
+  itemlookup <- item_table |>
+    pull("item")
+  if (missing(item)){
+    cat("\nitem missing\n")
+    if (interactive()){
+      item <- select.list(choices = itemlookup, multiple = FALSE,
+                          title = "Select item Code")
+    } else {
+      cat("\nTry running getHMDitemavail() if you're not sure which item you want.\n")
+      stop(paste0("item should be one of these:\n",
+                  paste(itemlookup, collapse = ", "), "\n"))
+    }
+  }
+  if (!(item %in% itemlookup)){
+    cat("\nitem not found\n")
+    if (interactive()){
+      item <- select.list(choices = itemlookup, multiple = FALSE,
+                          title = "Select item Code")
+    } else {
+      cat("\nTry running getHMDitemavail() if you're not sure which item you want.\n")
+      stop("item should be one of these:\n",
+           paste(itemlookup, collapse = ",\n"))
+    }
+  }
+  stopifnot(length(item) == 1)
+  
+  .item    <- item
+  stub_url <- item_table |>
+    dplyr::filter(item == .item) |>
+    pull("link")
+  grab_url <- paste0("https://www.mortality.org", stub_url)
+  
+  # TR: This session jump doesn't seem to be working as expected;
+  # grab_url brings me to text file if I paste it in a tab (logged in),
+  # but when I do a session_jump_to() it then I seem to stay at the login
+  # page, so I'm not seeing the
+  data_grab <- session_jump_to(html2, url = grab_url)
+  
+  # grab raw response text
+  the_table <- content(
+    data_grab$response,
+    as       = "text",
+    encoding = "UTF-8"
+  )
+  
+  ## ---- NEW: guard against HTML / failed auth --------------------------------
+  if (grepl("<!DOCTYPE html", the_table, ignore.case = TRUE) ||
+      grepl("<html",         the_table, ignore.case = TRUE) ||
+      grepl("Account/Login", the_table, fixed       = TRUE) ||
+      grepl("Invalid login", the_table, ignore.case = TRUE) ||
+      grepl("Please sign in", the_table, ignore.case = TRUE)) {
+    
+    stop(
+      paste0(
+        "HMD did not return a data text file for this request.\n",
+        "This usually means that login failed or your session is not authorized.\n\n",
+        "Please check your username and password. If your credentials are from before July 2022,\n",
+        "you may need to re-register here:\n",
+        "  https://www.mortality.org/Account/UserAgreement\n"
+      )
+    )
+  }
+  ## ---- END NEW BLOCK --------------------------------------------------------
+  
+  con <- textConnection(the_table)
+  
+  DF <-
+    read.table(
+      con,
+      header     = TRUE,
+      skip       = 2,
+      na.strings = ".",
+      as.is      = TRUE
+    )
+  
+  close(con)
+  
+  if (fixup) {
+    DF <- HMDparse(DF, filepath = grab_url)
+  }
+  
   invisible(DF)
-} # end readHMDweb()
+}
+
+
+
+# end readHMDweb()
 ############################################################################
 # readJMDweb()
 ############################################################################
