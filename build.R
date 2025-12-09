@@ -79,3 +79,15 @@ test<- readHMDweb("BEL", "Population",
                   username = Sys.getenv("us"),
                   password = Sys.getenv("pw"))
 getHMDcountries()
+
+
+myusername <- 'schmertmann@fsu.edu'
+mypassword <- 'not_my_pw'
+ 
+ 
+DEU <- HMDHFDplus::readHMDweb(
+                                      CNTRY=c("DEUTNP","FRATNP"),
+                                      item=c("bltper_1x1","tltper_1x1"),
+                              username = Sys.getenv("us"), 
+                              password = Sys.getenv("pw"),
+                              validate_items = FALSE)

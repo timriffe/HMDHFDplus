@@ -42,217 +42,336 @@ readHMD <- function(filepath, fixup = TRUE, ...){
 
 #' @title readHMDweb a basic HMD data grabber.
 #'
-#' @description This is a basic HMD data grabber, based on Carl Boe's original
-#' \code{HMD2R()}. It will only grab a single HMD statistical product from a
-#' single country. Some typical R pitfalls are removed: The Age column is
-#' coerced to integer, while an AgeInterval column is created. Also Population
-#' counts are placed into two columns, for Jan. 1st and Dec. 31 of the same
-#' year, so as to remove headaches from population universe adjustments, such as
-#' territorial changes. Fewer options means less to break. To do more
-#' sophisticated data extraction, iterate over country codes or statistical
-#' items. Reformatting can be done outside this function using, e.g.,
-#' \code{long2mat()}. Argument \code{fixup} is outsourced to \code{HMDparse()}.
+#' @description
+#' Basic HMD data grabber, based on Carl Boe's original \code{HMD2R()}.
+#' It can grab one or more HMD statistical products, possibly for multiple
+#' countries, using a single login session.
 #'
-#' @param CNTRY character. HMD population letter code. If not spelled right, or
-#'   not specified, the function provides a selection list. Only 1.
-#' @param item character. The statistical product you want, e.g.,
-#'   \code{"fltper_1x1"}. Only 1.
-#' @param username character. Your HMD user id, usually the email address you
-#'   registered with the HMD under. If left blank, you'll be prompted. Do that
-#'   if you don't mind the typing and prefer not to save your username in your
-#'   code.
-#' @param password character. Your HMD password. If left blank, you'll be
-#'   prompted. Do that if you don't mind the typing and prefer not to save your
-#'   password in your code.
-#' @param fixup logical. Should columns be made more user-friendly, e.g.,
-#'   forcing Age to be integer?
+#' Typical pitfalls are removed: the Age column is coerced to integer, while an
+#' AgeInterval column is created. Population counts are placed into two columns
+#' for Jan. 1 and Dec. 31 of the same year, so as to remove headaches from
+#' population universe adjustments. Argument \code{fixup} is outsourced to
+#' \code{HMDparse()}.
 #'
-#' @return data.frame of the HMD product, read as as \code{readHMD()} would read
-#'   it.
+#' @param CNTRY character vector. HMD country letter codes. If not spelled
+#'   right, or not specified, an interactive menu is offered (if possible).
+#' @param item character vector. HMD item code(s), e.g. \code{"fltper_1x1"}.
+#'   If missing and interactive, you can select from items available in at
+#'   least one selected country.
+#' @param username character. HMD username (usually your email).
+#' @param password character. HMD password.
+#' @param fixup logical. If TRUE, pass the downloaded table through
+#'   \code{HMDparse()} for convenience.
+#' @param validate_items logical. If TRUE (default), item codes are validated
+#'   against the union of items available across the selected countries.
 #'
-#' @details This function points to the new HMD website (from June 2022) rather
-#'   than the mirror of the old site that it temporarily pointed to; If your
-#'   credentials fail then a likely reason is that you need to re-register at
-#'   the new HMD website
-#'   \href{https://www.mortality.org/Account/UserAgreement}{https://www.mortality.org/Account/UserAgreement}.
-#'   As soon as you register, your new credentials should work.
+#' @return
+#' If a single item ends up with available data: a data.frame (possibly stacked
+#' over multiple countries, with \code{PopName} as the first column when more
+#' than one country is requested).
+#'
+#' If multiple items end up with available data: a named list of such
+#' data.frames, one per item.
+#'
+#' Output is returned invisibly.
+#'
+#' @details
+#' This function points to the new HMD website (from June 2022). If login
+#' fails, you may need to re-register at:
+#' \url{https://www.mortality.org/Account/UserAgreement}.
 #'
 #' @importFrom rvest html_form_set session html_form session_submit session_jump_to
 #' @importFrom httr content status_code
 #' @importFrom dplyr pull
 #' @export
-readHMDweb <- function(CNTRY, item, username, password, fixup = TRUE){
-  ## based on Carl Boe's RCurl tips
-  # modified by Tim Riffe
+readHMDweb <- function(CNTRY, item, username, password,
+                       fixup = TRUE, validate_items = TRUE){
   
-  # let user input name and password
-  if (missing(username)){
-    if (interactive()){
+  ## -------- 1) LOGIN -------- ##
+  if (missing(username)) {
+    if (interactive()) {
       cat("\ntype in HMD username (usually your email, quotes not necessary):\n")
       username <- userInput(FALSE)
     } else {
-      stop("if username and password not given as arguments, the R session must be interactive.")
+      stop("username/password must be given in non-interactive mode.")
     }
   }
-  if (missing(password)){
-    if (interactive()){
+  if (missing(password)) {
+    if (interactive()) {
       cat("\ntype in HMD password:\n")
-      password <-  userInput(FALSE)
+      password <- userInput(FALSE)
     } else {
-      stop("if username and password not given as arguments, the R session must be interactive.")
+      stop("username/password must be given in non-interactive mode.")
     }
   }
   
-  # Get logged in, starting here
   loginURL <- "https://www.mortality.org/Account/Login"
+  html     <- rvest::session(loginURL)
   
-  # concatenate the login string
-  html <- session(loginURL)
-  
-  # only one form on login page:
-  pgform        <- html_form(html)[[1]]
-  # hack because rvest doesn't record where we were??
+  pgform        <- rvest::html_form(html)[[1]]
   pgform$action <- loginURL
   pgform$url    <- loginURL
   the_token     <- pgform$fields["__RequestVerificationToken"]
-  filled_form   <- suppressWarnings(
-    html_form_set(
+  
+  filled_form <- suppressWarnings(
+    rvest::html_form_set(
       pgform,
       Email = username,
       Password = password,
-      '__RequestVerificationToken' =
+      `__RequestVerificationToken` =
         unlist(the_token)["__RequestVerificationToken.value"]
     )
   )
   
-  # test once credentials validated
-  html2 <- session_submit(html, filled_form)
-  Continue <- status_code(html2) == 200
+  html2    <- rvest::session_submit(html, filled_form)
+  Continue <- httr::status_code(html2) == 200L
   if (!Continue) {
-    stop(paste0(
-      "login didn't work.\n",
-      "Maybe your username or password are off? If your username and password are from before July 2022\n",
-      "then you'll need to re-register for HMD, starting here:\n",
-      "  https://www.mortality.org/Account/UserAgreement\n",
-      "We no longer refer to the mirror website https://www.former.mortality.org.\n",
-      "Those shenanigans were just a temporary patch to buy time to recode for the new site!\n"
-    ))
-  }
-  
-  ctrylist   <- getHMDcountries()
-  
-  ctrylookup <- ctrylist |>
-    select(-"link")
-  # get CNTRY
-  if (missing(CNTRY)){
-    cat("\nCNTRY missing\n")
-    if (interactive()){
-      CNTRY <- select.list(choices = ctrylookup$CNTRY, multiple = FALSE,
-                           title = "Select Country Code")
-    } else {
-      stop("CNTRY should be one of these:\n",
-           paste(ctrylookup$CNTRY, collapse = ",\n"))
-    }
-  }
-  if (!(CNTRY %in% ctrylookup$CNTRY)){
-    cat("\nCNTRY not found\n")
-    if (interactive()){
-      CNTRY <- select.list(choices = ctrylookup$CNTRY, multiple = FALSE,
-                           title = "Select Country Code")
-    } else {
-      stop("CNTRY should be one of these:\n",
-           paste(ctrylookup$CNTRY, collapse = ",\n"))
-    }
-  }
-  stopifnot(length(CNTRY) == 1)
-  
-  # repeat for item
-  item_table <- getHMDitemavail(CNTRY)
-  
-  itemlookup <- item_table |>
-    pull("item")
-  if (missing(item)){
-    cat("\nitem missing\n")
-    if (interactive()){
-      item <- select.list(choices = itemlookup, multiple = FALSE,
-                          title = "Select item Code")
-    } else {
-      cat("\nTry running getHMDitemavail() if you're not sure which item you want.\n")
-      stop(paste0("item should be one of these:\n",
-                  paste(itemlookup, collapse = ", "), "\n"))
-    }
-  }
-  if (!(item %in% itemlookup)){
-    cat("\nitem not found\n")
-    if (interactive()){
-      item <- select.list(choices = itemlookup, multiple = FALSE,
-                          title = "Select item Code")
-    } else {
-      cat("\nTry running getHMDitemavail() if you're not sure which item you want.\n")
-      stop("item should be one of these:\n",
-           paste(itemlookup, collapse = ",\n"))
-    }
-  }
-  stopifnot(length(item) == 1)
-  
-  .item    <- item
-  stub_url <- item_table |>
-    dplyr::filter(item == .item) |>
-    pull("link")
-  grab_url <- paste0("https://www.mortality.org", stub_url)
-  
-  # TR: This session jump doesn't seem to be working as expected;
-  # grab_url brings me to text file if I paste it in a tab (logged in),
-  # but when I do a session_jump_to() it then I seem to stay at the login
-  # page, so I'm not seeing the
-  data_grab <- session_jump_to(html2, url = grab_url)
-  
-  # grab raw response text
-  the_table <- content(
-    data_grab$response,
-    as       = "text",
-    encoding = "UTF-8"
-  )
-  
-  ## ---- NEW: guard against HTML / failed auth --------------------------------
-  if (grepl("<!DOCTYPE html", the_table, ignore.case = TRUE) ||
-      grepl("<html",         the_table, ignore.case = TRUE) ||
-      grepl("Account/Login", the_table, fixed       = TRUE) ||
-      grepl("Invalid login", the_table, ignore.case = TRUE) ||
-      grepl("Please sign in", the_table, ignore.case = TRUE)) {
-    
     stop(
-      paste0(
-        "HMD did not return a data text file for this request.\n",
-        "This usually means that login failed or your session is not authorized.\n\n",
-        "Please check your username and password. If your credentials are from before July 2022,\n",
-        "you may need to re-register here:\n",
-        "  https://www.mortality.org/Account/UserAgreement\n"
-      )
+      "Login failed.\n",
+      "Check your username/password, or re-register here:\n",
+      "  https://www.mortality.org/Account/UserAgreement\n"
     )
   }
-  ## ---- END NEW BLOCK --------------------------------------------------------
   
-  con <- textConnection(the_table)
+  ## -------- 2) COUNTRY VALIDATION -------- ##
+  ctrylist   <- getHMDcountries()
+  ctrylookup <- ctrylist |>
+    dplyr::select(-"link")
+  valid_codes <- ctrylookup$CNTRY
   
-  DF <-
-    read.table(
+  if (missing(CNTRY)) {
+    cat("\nCNTRY missing\n")
+    if (interactive()) {
+      CNTRY <- select.list(
+        choices  = valid_codes,
+        multiple = TRUE,
+        title    = "Select one or more Country Codes"
+      )
+      if (!length(CNTRY)) stop("No country selected.")
+    } else {
+      stop("CNTRY should be one of:\n", paste(valid_codes, collapse = ", "))
+    }
+  }
+  
+  CNTRY <- unique(CNTRY)
+  bad   <- setdiff(CNTRY, valid_codes)
+  
+  if (length(bad)) {
+    if (interactive()) {
+      message("Invalid CNTRY code(s): ", paste(bad, collapse = ", "))
+      CNTRY <- select.list(
+        choices  = valid_codes,
+        multiple = TRUE,
+        title    = "Select one or more valid Country Codes"
+      )
+      if (!length(CNTRY)) stop("No valid country selected.")
+    } else {
+      stop(
+        "Invalid CNTRY code(s): ", paste(bad, collapse = ", "),
+        "\nValid codes are:\n", paste(valid_codes, collapse = ", ")
+      )
+    }
+  }
+  
+  CNTRY_vec <- CNTRY
+  
+  ## -------- 3) ITEM HANDLING / VALIDATION -------- ##
+  
+  # lazy cache for per-country item tables
+  items_by_country <- list()
+  
+  get_items_for <- function(cntry) {
+    if (!is.null(items_by_country[[cntry]])) {
+      return(items_by_country[[cntry]])
+    }
+    tab <- getHMDitemavail(cntry)
+    items_by_country[[cntry]] <<- tab
+    tab
+  }
+  
+  union_items <- NULL
+  
+  if (missing(item) || validate_items) {
+    # Only pay the cost of scanning all countries when needed
+    if (interactive() && length(CNTRY_vec) >= 3L) {
+      message("Validating items across all selected countries...")
+    }
+    
+    # build items_by_country cache for all countries
+    for (cn in CNTRY_vec) {
+      if (is.null(items_by_country[[cn]])) {
+        items_by_country[[cn]] <- getHMDitemavail(cn)
+      }
+    }
+    
+    items_allowed_by_country <- lapply(CNTRY_vec, function(cn) {
+      clean_HMD_items(items_by_country[[cn]])
+    })
+    names(items_allowed_by_country) <- CNTRY_vec
+    union_items <- sort(unique(unlist(items_allowed_by_country)))
+  }
+  
+  if (missing(item)) {
+    cat("\nitem missing\n")
+    if (interactive()) {
+      item <- select.list(
+        choices  = union_items,
+        multiple = TRUE,
+        title    = "Select one or more item Codes"
+      )
+      if (!length(item)) stop("No item selected.")
+    } else {
+      stop(
+        "item must be given in non-interactive mode.\n",
+        "Valid items (available in at least one selected country) include:\n",
+        paste(union_items, collapse = ", ")
+      )
+    }
+  }
+  
+  item_vec <- unique(item)
+  
+  if (validate_items) {
+    invalid_items <- setdiff(item_vec, union_items)
+    if (length(invalid_items)) {
+      if (interactive()) {
+        message("Invalid item code(s): ", paste(invalid_items, collapse = ", "))
+        item_vec <- select.list(
+          choices  = union_items,
+          multiple = TRUE,
+          title    = "Select valid item Codes"
+        )
+        if (!length(item_vec)) stop("No valid item selected.")
+        item_vec <- unique(item_vec)
+      } else {
+        stop(
+          "Invalid item code(s): ", paste(invalid_items, collapse = ", "),
+          "\nValid items for these countries include:\n",
+          paste(union_items, collapse = ", ")
+        )
+      }
+    }
+  }
+  
+  ## -------- 4) DOWNLOAD HELPER -------- ##
+  unavailable <- character(0)
+  
+  grab_one <- function(cntry, itm) {
+    # lazy fetch + cache
+    item_table <- get_items_for(cntry)
+    item_clean <- clean_HMD_items(item_table)
+    
+    if (!itm %in% item_clean) {
+      # valid globally (if validate_items) but not for this country
+      unavailable <<- c(unavailable, paste(cntry, itm, sep = ":"))
+      return(NULL)
+    }
+    
+    stub_url <- item_table$link[item_table$item == itm][1L]
+    grab_url <- paste0("https://www.mortality.org", stub_url)
+    
+    data_grab <- rvest::session_jump_to(html2, url = grab_url)
+    the_table <- httr::content(
+      data_grab$response,
+      as       = "text",
+      encoding = "UTF-8"
+    )
+    
+    # HTML guard (failed login/expired session/etc)
+    if (grepl("<!DOCTYPE html", the_table, ignore.case = TRUE) ||
+        grepl("<html",         the_table, ignore.case = TRUE)  ||
+        grepl("Account/Login", the_table, fixed       = TRUE)) {
+      stop(
+        "HMD returned HTML instead of data for (", cntry, ", ", itm, "). ",
+        "Likely a login/session issue."
+      )
+    }
+    
+    con <- textConnection(the_table)
+    on.exit(close(con), add = TRUE)
+    
+    DF <- read.table(
       con,
       header     = TRUE,
       skip       = 2,
       na.strings = ".",
       as.is      = TRUE
     )
-  
-  close(con)
-  
-  if (fixup) {
-    DF <- HMDparse(DF, filepath = grab_url)
+    
+    if (fixup) {
+      DF <- HMDparse(DF, filepath = grab_url)
+    }
+    
+    DF
   }
   
-  invisible(DF)
+  ## -------- 5) LOOP OVER (COUNTRY, ITEM) -------- ##
+  res_by_item <- lapply(item_vec, function(itm) {
+    dfs <- lapply(CNTRY_vec, function(cntry) {
+      DF <- grab_one(cntry, itm)
+      if (is.null(DF)) return(NULL)
+      if (length(CNTRY_vec) > 1L) {
+        DF$PopName <- cntry
+      }
+      DF
+    })
+    
+    dfs <- Filter(Negate(is.null), dfs)
+    
+    if (!length(dfs)) {
+      return(NULL)
+    }
+    
+    if (length(dfs) == 1L) {
+      dfs[[1L]]
+    } else {
+      do.call(rbind, dfs)
+    }
+  })
+  names(res_by_item) <- item_vec
+  
+  # Drop items that had no data in any country
+  empty_items <- vapply(res_by_item, is.null, logical(1))
+  if (all(empty_items)) {
+    stop("No requested item available in any selected country.")
+  }
+  if (any(empty_items)) {
+    unavailable <- c(
+      unavailable,
+      paste("ALL_COUNTRIES", names(res_by_item)[empty_items], sep = ":")
+    )
+    res_by_item <- res_by_item[!empty_items]
+  }
+  
+  ## -------- 6) SHAPE RETURN VALUE -------- ##
+  out <- if (length(res_by_item) == 1L) res_by_item[[1L]] else res_by_item
+  
+  # Move PopName to first column (low-memory column reordering)
+  if (is.data.frame(out)) {
+    if ("PopName" %in% names(out)) {
+      out <- out[c("PopName", setdiff(names(out), "PopName"))]
+    }
+  } else if (is.list(out)) {
+    out <- lapply(out, function(x) {
+      if (is.data.frame(x) && "PopName" %in% names(x)) {
+        x[c("PopName", setdiff(names(x), "PopName"))]
+      } else {
+        x
+      }
+    })
+  }
+  
+  ## -------- 7) WARN ABOUT SKIPPED COMBOS -------- ##
+  if (length(unavailable)) {
+    warning(
+      "Some requested country/item combinations were unavailable and skipped:\n",
+      paste("  ", unavailable, collapse = "\n"),
+      call. = FALSE
+    )
+  }
+  
+  invisible(out)
 }
-
 
 
 # end readHMDweb()

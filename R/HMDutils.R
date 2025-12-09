@@ -379,6 +379,33 @@ getHMDitemavail <- function(CNTRY){
 }
 
 
+#' Clean HMD item table by removing non-data entries
+#'
+#' Drops inputDB-like series (birth, birthbymonth, death, pop) and
+#' documentation PDFs for the given country.
+#'
+#' @param tbl data.frame as returned by getHMDitemavail(), with columns
+#'   at least CNTRY and item.
+#'
+#' @keywords internal
+clean_HMD_items <- function(tbl) {
+  cntry <- unique(tbl$CNTRY)
+  stopifnot(length(cntry) == 1L)
+  
+  x <- tbl$item
+  
+  # PDFs
+  x <- x[!grepl(paste0("^", cntry, ".*\\.pdf$"), x, ignore.case = TRUE)]
+  
+  # inputDB-like items
+  pat_inputDB <- paste0("^", cntry, "(birth|birthbymonth|death|pop)$")
+  x <- x[!grepl(pat_inputDB, x, ignore.case = TRUE)]
+  
+  unique(x)
+}
+
+
+
 ## load globals to avoid "no visible binding" NOTEs in package checks:
 utils::globalVariables(c("years2", "link", "base","item","measure",
                          "sex","lexis","age_interval","Age","ARDY","Cohort",

@@ -1,5 +1,10 @@
 # Changes in this update
 
+# HMDHFDplus 2.0.12
+9 December 2025
+* readHMDweb() now accepts vectors for CNTRY and item
+* readHMDweb() now gives an informative eror for failed login
+
 # HMDHFDplus 2.0.8
 2 October 2025
 * fixes xpath for getHMDcountries() to adapt to changes in HMD website. HT Ugo and Alyson for reporting
