@@ -268,6 +268,14 @@ readHMDweb <- function(CNTRY, item, username, password,
     }
     
     stub_url <- item_table$link[item_table$item == itm][1L]
+    
+    if (is.na(stub_url) || length(stub_url) == 0) {
+      stop(
+        "Could not find link for item '", itm, "' in country '", cntry, "'.\n",
+        "Available items: ", paste(item_table$item, collapse = ", ")
+      )
+    }
+    
     grab_url <- paste0("https://www.mortality.org", stub_url)
     
     data_grab <- rvest::session_jump_to(html2, url = grab_url)
@@ -282,8 +290,11 @@ readHMDweb <- function(CNTRY, item, username, password,
         grepl("<html",         the_table, ignore.case = TRUE)  ||
         grepl("Account/Login", the_table, fixed       = TRUE)) {
       stop(
-        "HMD returned HTML instead of data for (", cntry, ", ", itm, "). ",
-        "Likely a login/session issue."
+        "HMD returned HTML instead of data for (", cntry, ", ", itm, ").\n",
+        "URL attempted: ", grab_url, "\n",
+        "Likely a login/session issue or incorrect URL.\n",
+        "First 500 chars of response:\n",
+        substr(the_table, 1, 500)
       )
     }
     
