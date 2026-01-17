@@ -372,7 +372,8 @@ getHMDitemavail <- function(CNTRY){
                            substr(item,1,1) == "f" ~ "female",
                            substr(item,1,1) == "b" ~ "total",
                            measure %in% c("Births","Deaths","Exposures","Rates","Life Expectancy","Population") ~ "all")) |>
-  select(item, measure, sex, lexis, age_interval, period_interval, cohort_interval, link)
+  mutate(CNTRY = CNTRY) |>
+  select(CNTRY, item, measure, sex, lexis, age_interval, period_interval, cohort_interval, link)
     
     
 	return(item_table)
