@@ -26,17 +26,17 @@ Collate:
     'readHFD.R' 
     'readHMD.R'  
     'userInput.R'
-Imports: 
-	httr (>= 1.4.7),
-	rvest (>= 1.0.5),
-	dplyr (>= 1.1.4),
-	janitor, 
-	lubridate,
-	readr ,
-	stringr,
-	tidyr,
-	rlang (>= 1.1.7),
-	tidyselect
+Imports:
+    httr (>= 1.4.7),
+    rvest (>= 1.0.5),
+    dplyr (>= 1.1.4),
+    janitor,
+    lubridate,
+    readr,
+    stringr,
+    tidyr,
+    rlang (>= 1.1.7),
+    tidyselect
 Suggests:
   testthat (>= 3.0.0)
 Config/testthat/edition: 3
