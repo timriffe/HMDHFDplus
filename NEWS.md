@@ -1,4 +1,7 @@
 # Changes in this update
+# HMDHFDplus 2.0.13
+29 January 2026
+* Min versions added to selected imports
 
 # HMDHFDplus 2.0.12
 9 December 2025

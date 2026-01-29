@@ -1,8 +1,8 @@
 Package: HMDHFDplus
 Type: Package
 Title: Read Human Mortality Database and Human Fertility Database Data from the Web
-Version: 2.0.12
-Date: 2025-12-09
+Version: 2.0.13
+Date: 2026-01-29
 Authors@R: c(
    person("Tim", "Riffe", role = c("aut", "cre"), 
           email = "tim.riffe@gmail.com"),
@@ -27,18 +27,17 @@ Collate:
     'readHMD.R'  
     'userInput.R'
 Imports: 
-	httr,
-	rvest,
-	dplyr,
-	janitor,
+	httr (>= 1.4.7),
+	rvest (>= 1.0.5),
+	dplyr (>= 1.1.4),
+	janitor, 
 	lubridate,
-	readr,
+	readr ,
 	stringr,
 	tidyr,
-	rlang,
+	rlang (>= 1.1.7),
 	tidyselect
 Suggests:
-  RCurl,
   testthat (>= 3.0.0)
 Config/testthat/edition: 3
 RoxygenNote: 7.3.3
