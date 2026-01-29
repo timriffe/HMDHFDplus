@@ -82,7 +82,7 @@ readHMD <- function(filepath, fixup = TRUE, ...){
 #'
 #' @importFrom rvest html_form_set session html_form session_submit session_jump_to
 #' @importFrom httr content status_code
-#' @importFrom dplyr pull
+#' @importFrom dplyr select
 #' @export
 readHMDweb <- function(CNTRY, item, username, password,
                        fixup = TRUE, validate_items = TRUE){

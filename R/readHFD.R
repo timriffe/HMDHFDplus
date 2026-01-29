@@ -61,7 +61,7 @@ readHFD <- function(filepath, fixup = TRUE, item = NULL, ...){
 #' @importFrom httr content status_code
 #' @importFrom rvest session html_form html_form_set session_submit session_jump_to  
 #' @importFrom utils select.list
-#' @importFrom dplyr filter pull
+#' @importFrom dplyr filter 
 #' @importFrom lubridate ymd is.Date
 
 #' 
@@ -168,8 +168,6 @@ https://www.humanfertility.org/Account/UserAgreement"))
 	} else {
 	  .item = item
 	}
-	
-	# data_url <- itemavail |> filter(item == .item) |> pull(link)
 	
 	if (is.null(Update)){
 	  yyyymmdd <- getHFDdate(CNTRY)

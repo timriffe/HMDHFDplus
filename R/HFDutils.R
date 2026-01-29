@@ -198,7 +198,7 @@ getHFDitemavail <- function(CNTRY){
       mutate(across(where(is.numeric),as.character))  |>     
             
       pivot_longer(-.data$measure,names_to = "subtype",values_to = "years") |> 
-      filter(.data$measure != "")
+      dplyr::filter(.data$measure != "")
   }
   
   html <- read_html(CountryURL)
@@ -208,7 +208,7 @@ getHFDitemavail <- function(CNTRY){
     html_table() |>
     lapply(FUN = tidy_chunk) |>
     bind_rows() |>
-    filter(years != "-")
+    dplyr::filter(years != "-")
   
   years <-
     html |>
@@ -232,7 +232,7 @@ getHFDitemavail <- function(CNTRY){
   item_table <- 
   cntry_tables |>
     bind_cols(linksyears) |>
-    filter(grepl(.data$link,pattern="*.txt")) |>
+    dplyr::filter(grepl(.data$link,pattern="*.txt")) |>
     mutate(lexis = case_when(grepl(.data$link,pattern = "TR") ~ "triangle",
                              grepl(.data$link,pattern = "RR") ~ "age-period",
                              grepl(.data$link,pattern = "VH") ~ "age-cohort",
@@ -251,7 +251,7 @@ getHFDitemavail <- function(CNTRY){
     subtype = gsub('[0-9]+', '', .data$subtype),
            subtype = sub("_$", "", .data$subtype),
            subtype = if_else(.data$subtype == "years", "Input data", .data$subtype)) |> 
-  select(-.data$years2) |>
+  dplyr::select(-.data$years2) |>
   mutate(item = .data$link |>
            str_split(pattern = "\\\\") |>
            lapply(rev) |>

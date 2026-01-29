@@ -320,7 +320,7 @@ getHMDitemavail <- function(CNTRY){
   
   item_table <- 
     tibble(link = links, years2 = years) |>
-    filter(! years2 %in% c("\r txt\r","\r pdf\r","html")) |>
+    dplyr::filter(! years2 %in% c("\r txt\r","\r pdf\r","html")) |>
     mutate(base = basename(link),
            item = gsub(base, pattern = ".txt", replacement = ""),
            measure = case_when(grepl(item, pattern = "E0") ~ "Life Expectancy",
@@ -373,7 +373,7 @@ getHMDitemavail <- function(CNTRY){
                            substr(item,1,1) == "b" ~ "total",
                            measure %in% c("Births","Deaths","Exposures","Rates","Life Expectancy","Population") ~ "all")) |>
   mutate(CNTRY = CNTRY) |>
-  select(CNTRY, item, measure, sex, lexis, age_interval, period_interval, cohort_interval, link)
+  dplyr::select(CNTRY, item, measure, sex, lexis, age_interval, period_interval, cohort_interval, link)
     
     
 	return(item_table)
