@@ -1,4 +1,8 @@
 # Changes in this update
+# HMDHFDplus 2.0.14
+7 May 2026
+* Adds FRACNP to country list. HT @mbs2016
+
 # HMDHFDplus 2.0.13
 29 January 2026
 * Min versions added to selected imports

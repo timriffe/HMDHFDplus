@@ -170,7 +170,7 @@ HMDparse <- function(DF, filepath){
 #' @return a vector of HMD country short codes.
 #' 
 #' @importFrom rvest read_html html_element html_elements html_attr html_text2
-#' @importFrom dplyr tibble mutate
+#' @importFrom dplyr tibble mutate arrange
 #' @importFrom rlang .data
 #' 
 #' @export
@@ -199,6 +199,7 @@ getHMDcountries <- function(){
   # subpopulations are more of a pain to scrape; doable, but this is easier
   tab_extra <- tibble(Country = c("England and Wales (Total Population)",
                                   "England and Wales (Civilian Population)",
+                                  "France (Civilian Population)",
                                   "Scotland",
                                   "Northern Ireland",
                                   "New Zealand Maori",
@@ -207,6 +208,7 @@ getHMDcountries <- function(){
                                   "West Germany"),
                       link = c("/Country/Country?cntr=GBRTENW",
                                "/Country/Country?cntr=GBRCENW",
+                               "/Country/Country?cntr=FRACNP",
                                "/Country?cntr=GBR_SCO",
                                "/Country?cntr=GBR_NIR",
                                "/Country?cntr=NZL_MA",
@@ -215,6 +217,7 @@ getHMDcountries <- function(){
                                "/Country?cntr=DEUTW"),
                       CNTRY = c("GBRTENW",
                                 "GBRCENW",
+                                "FRACNP",
                                 "GBR_SCO",
                                 "GBR_NIR",
                                 "NZL_MA",
@@ -223,7 +226,7 @@ getHMDcountries <- function(){
                                 "DEUTW"))
   
   rbind(tab_main,
-        tab_extra) 
+        tab_extra) |> arrange(.data$CNTRY)
 }
 
 ############################################################################
